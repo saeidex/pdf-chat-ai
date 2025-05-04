@@ -9,7 +9,7 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -51,37 +51,11 @@ export default function PDFChatPage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col h-[calc(100vh-64px)] p-4">
-                <div className="flex items-center mb-4">
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link href="/dashboard">
-                            <ChevronLeft className="h-4 w-4" />
-                            <span className="sr-only">Back to Dashboard</span>
-                        </Link>
-                    </Button>
-                    <Skeleton className="h-6 w-48 ml-2" />
-                </div>
-                <ResizablePanelGroup
-                    direction="horizontal"
-                    className="flex-grow rounded-lg border"
-                >
-                    <ResizablePanel defaultSize={60}>
-                        <div className="h-full bg-muted/20 flex items-center justify-center">
-                            <Skeleton className="w-3/4 h-3/4" />
-                        </div>
-                    </ResizablePanel>
-                    <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={40}>
-                        <div className="h-full p-4">
-                            <Skeleton className="w-full h-12 mb-4" />
-                            <div className="space-y-2">
-                                <Skeleton className="w-full h-20" />
-                                <Skeleton className="w-3/4 h-20 ml-auto" />
-                                <Skeleton className="w-full h-20" />
-                            </div>
-                        </div>
-                    </ResizablePanel>
-                </ResizablePanelGroup>
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                <p className="text-sm text-muted-foreground">
+                    Loading PDF document...
+                </p>
             </div>
         );
     }
