@@ -3,6 +3,7 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Bot, SendHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -133,96 +134,130 @@ export default function ChatPanel({
         return `Based on "${documentName}", I can tell you that the document contains information relevant to your query. You might find more specific details by asking about particular sections or concepts in the document.`;
     }
 
-    return (
-        <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
-                <h2 className="font-semibold">Chat with PDF</h2>
-                <p className="text-sm text-muted-foreground">
-                    Ask questions about "{documentName}"
-                </p>
-            </div>
+    const MessageBubble = ({ message }: { message: Message }) => {
+        const isUser = message.sender === "user";
 
-            <div className="flex-grow overflow-y-auto p-4">
-                <div className="space-y-4">
-                    {messages.map((message) => (
-                        <div
-                            key={message.id}
-                            className={`flex ${
-                                message.sender === "user"
-                                    ? "justify-end"
-                                    : "justify-start"
-                            }`}
-                        >
-                            <div
-                                className={`flex max-w-[80%] rounded-lg p-4 ${
-                                    message.sender === "user"
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted"
-                                }`}
-                            >
-                                {message.sender === "assistant" && (
-                                    <Avatar className="h-8 w-8 mr-2 mt-1">
-                                        <Bot className="h-4 w-4" />
-                                    </Avatar>
-                                )}
-                                <div className="space-y-1">
-                                    <div className="prose prose-sm dark:prose-invert">
-                                        {message.content}
-                                    </div>
-                                    <div
-                                        className={`text-xs ${
-                                            message.sender === "user"
-                                                ? "text-primary-foreground/70"
-                                                : "text-muted-foreground"
-                                        }`}
-                                    >
-                                        {message.timestamp.toLocaleTimeString(
-                                            [],
-                                            {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            }
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                    {isLoading && (
-                        <div className="flex justify-start">
-                            <div className="flex max-w-[80%] rounded-lg p-4 bg-muted">
-                                <Avatar className="h-8 w-8 mr-2">
-                                    <Bot className="h-4 w-4 animate-pulse" />
-                                </Avatar>
-                                <div className="space-y-2">
-                                    <div className="h-5 w-20 rounded-md bg-muted-foreground/20 animate-pulse"></div>
-                                    <div className="h-5 w-32 rounded-md bg-muted-foreground/20 animate-pulse"></div>
-                                </div>
-                            </div>
-                        </div>
+        return (
+            <div
+                className={cn(
+                    "flex w-full mb-6 animate-in fade-in-0 slide-in-from-bottom-5 duration-300",
+                    isUser ? "justify-end" : "justify-start"
+                )}
+            >
+                <div
+                    className={cn(
+                        "flex items-start max-w-[85%] group",
+                        isUser ? "flex-row-reverse" : "flex-row"
                     )}
-                    <div ref={messagesEndRef} />
+                >
+                    <div
+                        className={cn(
+                            "flex-shrink-0",
+                            isUser ? "ml-3" : "mr-3"
+                        )}
+                    >
+                        <Avatar
+                            className={cn(
+                                "border-2 h-8 w-8 flex items-center justify-center",
+                                isUser
+                                    ? "border-primary bg-primary/10"
+                                    : "border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800"
+                            )}
+                        >
+                            <div className="flex items-center justify-center w-full h-full">
+                                <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+                            </div>
+                        </Avatar>
+                    </div>
+
+                    <div>
+                        <div
+                            className={cn(
+                                "px-4 py-3 rounded-2xl mb-1 prose prose-sm max-w-none",
+                                isUser
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-zinc-100 dark:bg-zinc-800 text-foreground"
+                            )}
+                        >
+                            {message.content}
+                        </div>
+                        <div
+                            className={cn(
+                                "text-xs opacity-0 group-hover:opacity-70 transition-opacity px-2",
+                                isUser ? "text-right" : "text-left"
+                            )}
+                        >
+                            {message.timestamp.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
+        );
+    };
 
-            <form onSubmit={handleSubmit} className="p-4 border-t">
-                <div className="flex items-center space-x-2">
-                    <Input
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Ask a question about this document..."
-                        disabled={isLoading}
-                        className="flex-grow"
-                    />
-                    <Button
-                        type="submit"
-                        size="icon"
-                        disabled={!inputValue.trim() || isLoading}
-                    >
-                        <SendHorizontal className="h-4 w-4" />
-                    </Button>
+    const TypingIndicator = () => (
+        <div className="flex items-start mb-6 animate-in fade-in-0 slide-in-from-bottom-3">
+            <Avatar className="h-8 w-8 mr-3 border-2 border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 flex items-center justify-center">
+                <div className="flex items-center justify-center w-full h-full">
+                    <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
                 </div>
-            </form>
+            </Avatar>
+            <div className="px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center">
+                <div className="flex space-x-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
+                         style={{ animationDelay: '0ms', animationDuration: '1000ms' }} />
+                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
+                         style={{ animationDelay: '150ms', animationDuration: '1000ms' }} />
+                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
+                         style={{ animationDelay: '300ms', animationDuration: '1000ms' }} />
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-950 chat-gradient-bg">
+            <div className="flex-grow overflow-y-auto p-4 md:p-6 scrollbar-thin">
+                <div className="space-y-2 max-w-3xl mx-auto">
+                    {messages.map((message) => (
+                        <MessageBubble key={message.id} message={message} />
+                    ))}
+
+                    {isLoading && <TypingIndicator key="typing-indicator" />}
+                </div>
+                <div ref={messagesEndRef} />
+            </div>
+
+            <div className="p-4 border-t bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky bottom-0 z-10 animate-in slide-in-from-bottom-5 duration-300">
+                <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+                    <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800 px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-sm transition-all duration-200">
+                        <Input
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder="Ask a question about this document..."
+                            disabled={isLoading}
+                            className="flex-grow border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                        />
+                        <Button
+                            type="submit"
+                            size="icon"
+                            variant="ghost"
+                            disabled={!inputValue.trim() || isLoading}
+                            className={cn(
+                                "rounded-full hover:bg-primary/10 transition-colors",
+                                inputValue.trim() && !isLoading
+                                    ? "text-primary"
+                                    : "text-muted-foreground"
+                            )}
+                        >
+                            <SendHorizontal className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

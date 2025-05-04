@@ -1,12 +1,9 @@
 "use client";
 
-import { FadeIn } from "@/components/ui/animations/FadeIn";
-import { FloatingElement } from "@/components/ui/animations/FloatingElement";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { ArrowUpRight, Bot, FileText, Search, Upload } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const chatMessages = [
     {
@@ -46,10 +43,7 @@ const floatingElements = [
     {
         id: "upload",
         position: "absolute top-12 -left-10 z-20 w-24 h-20",
-        delay: 0.2,
-        distance: 12,
-        yOffset: -15,
-        duration: 3.5,
+        animationClass: "animate-float-slow",
         content: (
             <div className="h-full w-full flex flex-col items-center justify-center">
                 <Upload className="h-8 w-8 text-blue-600 dark:text-blue-500" />
@@ -60,10 +54,7 @@ const floatingElements = [
     {
         id: "search",
         position: "absolute bottom-10 -right-8 z-20 p-3",
-        delay: 0.3,
-        distance: 8,
-        yOffset: 15,
-        duration: 3,
+        animationClass: "animate-float-medium",
         content: (
             <div className="flex items-center gap-2">
                 <Search className="h-5 w-5 text-green-600 dark:text-green-500" />
@@ -76,18 +67,6 @@ const floatingElements = [
 ];
 
 const Hero = () => {
-    const [isVisible, setIsVisible] = useState(false);
-
-    // Ensure the glow effect appears with the chat card
-    useEffect(() => {
-        // Small delay to ensure the chat card animation starts first
-        const timer = setTimeout(() => {
-            setIsVisible(true);
-        }, 200);
-
-        return () => clearTimeout(timer);
-    }, []);
-
     return (
         <section
             className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-white to-blue-50/50 dark:from-background dark:to-indigo-950/10"
@@ -103,84 +82,53 @@ const Hero = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div className="text-center mx-auto max-w-xl">
                         {/* Hero text content section */}
-                        <FadeIn>
-                            <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 dark:bg-primary/5 text-primary border border-primary/20 dark:border-primary/10 mb-6 shadow-sm">
-                                <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-                                Try now
-                            </div>
-                        </FadeIn>
+                        <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 dark:bg-primary/5 text-primary border border-primary/20 dark:border-primary/10 mb-6 shadow-sm animate-fade-in-up">
+                            <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+                            Try now
+                        </div>
 
-                        <FadeIn delay={0.1}>
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                                Chat with your{" "}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500">
-                                    PDF documents
-                                </span>{" "}
-                                using AI
-                            </h1>
-                        </FadeIn>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in-up delay-100">
+                            Chat with your{" "}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500">
+                                PDF documents
+                            </span>
+                            using AI
+                        </h1>
 
-                        <FadeIn delay={0.2}>
-                            <p className="mt-6 text-lg text-muted-foreground mx-auto">
-                                PdfChat uses advanced AI to help you analyze,
-                                extract insights, and answer questions from your
-                                PDF documents in seconds. No more manual
-                                searching.
-                            </p>
-                        </FadeIn>
+                        <p className="mt-6 text-lg text-muted-foreground mx-auto animate-fade-in-up delay-200">
+                            PdfChat uses advanced AI to help you analyze,
+                            extract insights, and answer questions from your PDF
+                            documents in seconds. No more manual searching.
+                        </p>
 
-                        <FadeIn delay={0.3}>
-                            <div className="mt-8 flex justify-center">
-                                <Link href="/dashboard">
-                                    <Button
-                                        size="lg"
-                                        className="font-medium text-base px-6"
-                                    >
-                                        <ArrowUpRight className="mr-2 h-5 w-5" />
-                                        Get Started
-                                    </Button>
-                                </Link>
-                            </div>
-                        </FadeIn>
+                        <div className="mt-8 flex justify-center animate-fade-in-up delay-300">
+                            <Link href="/dashboard">
+                                <Button
+                                    size="lg"
+                                    className="font-medium text-base px-6"
+                                >
+                                    <ArrowUpRight className="mr-2 h-5 w-5" />
+                                    Get Started
+                                </Button>
+                            </Link>
+                        </div>
 
-                        <FadeIn delay={0.4}>
-                            <p className="mt-6 text-sm text-muted-foreground">
-                                Secure and private. Your documents are processed
-                                instantly.
-                            </p>
-                        </FadeIn>
+                        <p className="mt-6 text-sm text-muted-foreground animate-fade-in-up delay-400">
+                            Secure and private. Your documents are processed
+                            instantly.
+                        </p>
                     </div>
 
                     <div className="relative mx-auto">
                         {/* Animated glow effect */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{
-                                opacity: isVisible ? [0.2, 0.4, 0.3] : 0,
-                                scale: isVisible ? [0.9, 1.05, 1] : 0.8,
-                                y: isVisible ? [5, -5, 0] : 0,
-                            }}
-                            transition={{
-                                duration: 4,
-                                repeat: Number.POSITIVE_INFINITY,
-                                repeatType: "reverse",
-                                ease: "easeInOut",
-                                times: [0, 0.5, 1],
-                            }}
-                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[110%] rounded-[40%] z-0"
-                        >
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[110%] rounded-[40%] z-0 animate-fade-in">
                             {/* Multiple layers for richer glow effect */}
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-indigo-500/30 dark:from-blue-600/20 dark:via-purple-600/30 dark:to-indigo-500/20 blur-3xl rounded-[40%]" />
                             <div className="absolute inset-[10%] bg-gradient-to-tr from-purple-500/20 via-blue-500/25 to-purple-400/20 dark:from-purple-600/20 dark:via-blue-500/25 dark:to-purple-400/15 blur-2xl rounded-[30%]" />
-                        </motion.div>
+                        </div>
 
                         {/* Chat preview */}
-                        <FloatingElement
-                            className="relative z-10 overflow-hidden rounded-2xl border border-border/60 shadow-xl bg-white dark:bg-background"
-                            delay={0.1}
-                            distance={10}
-                            duration={4}
-                        >
+                        <div className="relative z-10 overflow-hidden rounded-2xl border border-border/60 shadow-xl bg-white dark:bg-background animate-fade-in-up delay-200">
                             {/* Document header */}
                             <div className="rounded-t-2xl bg-muted/80 dark:bg-muted/70 border-b border-border/60 p-4 flex items-center justify-between">
                                 <div className="flex items-center">
@@ -190,12 +138,9 @@ const Hero = () => {
                                     </span>
                                 </div>
                                 <div className="flex gap-1.5">
-                                    {["red", "yellow", "green"].map((color) => (
-                                        <div
-                                            key={color}
-                                            className={`w-3 h-3 rounded-full bg-${color}-500 opacity-80 dark:opacity-70`}
-                                        />
-                                    ))}
+                                    <div className="w-3 h-3 rounded-full bg-green-500 opacity-80 dark:opacity-70" />
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500 opacity-80 dark:opacity-70" />
+                                    <div className="w-3 h-3 rounded-full bg-red-500 opacity-80 dark:opacity-70" />
                                 </div>
                             </div>
 
@@ -257,20 +202,16 @@ const Hero = () => {
                                     </button>
                                 </div>
                             </div>
-                        </FloatingElement>
+                        </div>
 
                         {/* Floating elements */}
                         {floatingElements.map((element) => (
-                            <FloatingElement
+                            <div
                                 key={element.id}
-                                className={`${element.position} bg-white dark:bg-background rounded-xl shadow-lg border border-border/60`}
-                                delay={element.delay}
-                                distance={element.distance}
-                                yOffset={element.yOffset}
-                                duration={element.duration}
+                                className={`${element.position} ${element.animationClass} bg-white dark:bg-background rounded-xl shadow-lg border border-border/60`}
                             >
                                 {element.content}
-                            </FloatingElement>
+                            </div>
                         ))}
                     </div>
                 </div>

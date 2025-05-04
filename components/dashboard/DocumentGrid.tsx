@@ -10,7 +10,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { FadeIn } from "@/components/ui/animations/FadeIn";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -38,9 +37,8 @@ import {
     Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
-// Mock document data based on files in mock-pdf directory
 const initialDocuments = [
     {
         id: "1",
@@ -110,23 +108,20 @@ export default function DocumentGrid() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {/* Upload card */}
-                <FadeIn>
-                    <div className="group border-2 border-dashed rounded-lg p-6 h-64 flex flex-col items-center justify-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30">
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                            <Upload className="h-8 w-8 text-primary" />
-                        </div>
-                        <h3 className="font-medium text-lg mb-1">Upload New</h3>
-                        <p className="text-sm text-muted-foreground text-center">
-                            Upload a PDF document to analyze
-                        </p>
+                <div className="group border-2 border-dashed rounded-lg p-6 h-64 flex flex-col items-center justify-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <Upload className="h-8 w-8 text-primary" />
                     </div>
-                </FadeIn>
+                    <h3 className="font-medium text-lg mb-1">Upload New</h3>
+                    <p className="text-sm text-muted-foreground text-center">
+                        Upload a PDF document to analyze
+                    </p>
+                </div>
 
                 {/* Document cards */}
                 {documents.map((doc, index) => (
-                    <FadeIn key={doc.id} delay={index * 0.1}>
+                    <Fragment key={doc.id}>
                         <div className="group relative border rounded-lg overflow-hidden h-64 bg-muted/20 hover:shadow-md transition-all">
-                            {/* Document preview - in a real app, this would be an actual PDF preview */}
                             <Link
                                 href={`/dashboard/chats/${doc.id}`}
                                 className="block h-3/4 w-full"
@@ -137,7 +132,6 @@ export default function DocumentGrid() {
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                    {/* Chat overlay - appears on hover */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                                         <Button className="flex items-center gap-2">
                                             <MessageSquareText className="h-4 w-4" />
@@ -147,7 +141,6 @@ export default function DocumentGrid() {
                                 </div>
                             </Link>
 
-                            {/* Document details */}
                             <div className="p-3 flex justify-between items-center">
                                 <div className="overflow-hidden">
                                     <h3 className="font-medium truncate">
@@ -163,7 +156,6 @@ export default function DocumentGrid() {
                                     </p>
                                 </div>
 
-                                {/* Document options menu */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button
@@ -204,11 +196,10 @@ export default function DocumentGrid() {
                                 </DropdownMenu>
                             </div>
                         </div>
-                    </FadeIn>
+                    </Fragment>
                 ))}
             </div>
 
-            {/* Rename Dialog */}
             <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -234,7 +225,6 @@ export default function DocumentGrid() {
                 </DialogContent>
             </Dialog>
 
-            {/* Delete Confirmation Dialog */}
             <AlertDialog
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
