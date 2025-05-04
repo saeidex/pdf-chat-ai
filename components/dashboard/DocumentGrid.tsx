@@ -29,7 +29,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, MoreVertical, Pencil, Trash2, Upload } from "lucide-react";
+import {
+    FileText,
+    MessageSquareText,
+    MoreVertical,
+    Pencil,
+    Trash2,
+    Upload,
+} from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 // Mock document data based on files in mock-pdf directory
@@ -119,12 +127,25 @@ export default function DocumentGrid() {
                     <FadeIn key={doc.id} delay={index * 0.1}>
                         <div className="group relative border rounded-lg overflow-hidden h-64 bg-muted/20 hover:shadow-md transition-all">
                             {/* Document preview - in a real app, this would be an actual PDF preview */}
-                            <div className="h-3/4 w-full bg-background border-b relative overflow-hidden">
-                                <div className="flex justify-center items-center w-full h-full bg-muted/30">
-                                    <FileText className="h-16 w-16 text-primary/30" />
+                            <Link
+                                href={`/dashboard/chats/${doc.id}`}
+                                className="block h-3/4 w-full"
+                            >
+                                <div className="h-full w-full bg-background border-b relative overflow-hidden">
+                                    <div className="flex justify-center items-center w-full h-full bg-muted/30">
+                                        <FileText className="h-16 w-16 text-primary/30" />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                    {/* Chat overlay - appears on hover */}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                        <Button className="flex items-center gap-2">
+                                            <MessageSquareText className="h-4 w-4" />
+                                            Chat with PDF
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
+                            </Link>
 
                             {/* Document details */}
                             <div className="p-3 flex justify-between items-center">
@@ -135,7 +156,9 @@ export default function DocumentGrid() {
                                     <p className="text-xs text-muted-foreground">
                                         {formatDistanceToNow(
                                             new Date(doc.updatedAt),
-                                            { addSuffix: true }
+                                            {
+                                                addSuffix: true,
+                                            }
                                         )}
                                     </p>
                                 </div>
@@ -155,6 +178,14 @@ export default function DocumentGrid() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href={`/dashboard/chats/${doc.id}`}
+                                            >
+                                                <MessageSquareText className="h-4 w-4 mr-2" />
+                                                Chat with PDF
+                                            </Link>
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() => handleRename(doc)}
                                         >
