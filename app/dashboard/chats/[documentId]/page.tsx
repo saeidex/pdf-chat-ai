@@ -8,7 +8,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -75,7 +74,7 @@ export default function PDFChatPage() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] p-4">
+        <div className="flex flex-col h-screen p-4">
             <div className="flex items-center mb-4">
                 <Button variant="ghost" size="icon" asChild>
                     <Link href="/dashboard">

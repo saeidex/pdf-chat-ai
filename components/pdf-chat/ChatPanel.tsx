@@ -2,7 +2,7 @@
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Bot, SendHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -34,11 +34,26 @@ export default function ChatPanel({
     const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Scroll to bottom of messages when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
+    // Auto-resize textarea based on content
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const adjustHeight = () => {
+            textarea.style.height = "auto";
+            const newHeight = Math.min(textarea.scrollHeight, 150);
+            textarea.style.height = `${newHeight}px`;
+        };
+
+        adjustHeight();
+    }, [inputValue]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -207,12 +222,27 @@ export default function ChatPanel({
             </Avatar>
             <div className="px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center">
                 <div className="flex space-x-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
-                         style={{ animationDelay: '0ms', animationDuration: '1000ms' }} />
-                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
-                         style={{ animationDelay: '150ms', animationDuration: '1000ms' }} />
-                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" 
-                         style={{ animationDelay: '300ms', animationDuration: '1000ms' }} />
+                    <div
+                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                        style={{
+                            animationDelay: "0ms",
+                            animationDuration: "1000ms",
+                        }}
+                    />
+                    <div
+                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                        style={{
+                            animationDelay: "150ms",
+                            animationDuration: "1000ms",
+                        }}
+                    />
+                    <div
+                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                        style={{
+                            animationDelay: "300ms",
+                            animationDuration: "1000ms",
+                        }}
+                    />
                 </div>
             </div>
         </div>
@@ -233,13 +263,27 @@ export default function ChatPanel({
 
             <div className="p-4 border-t bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky bottom-0 z-10 animate-in slide-in-from-bottom-5 duration-300">
                 <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-                    <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800 px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-sm transition-all duration-200">
-                        <Input
+                    <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 rounded-t-2xl border border-zinc-200 dark:border-zinc-800 px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-sm transition-all duration-200">
+                        <Textarea
+                            ref={textareaRef}
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    if (inputValue.trim() && !isLoading) {
+                                        handleSubmit(e);
+                                    }
+                                }
+                            }}
                             placeholder="Ask a question about this document..."
                             disabled={isLoading}
-                            className="flex-grow border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                            className="flex-grow border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent resize-none min-h-0 py-2 h-10 max-h-32 overflow-auto scrollbar-thin"
+                            style={{
+                                overflowY: "auto",
+                                lineHeight: "1.5",
+                            }}
+                            rows={1}
                         />
                         <Button
                             type="submit"
@@ -247,7 +291,7 @@ export default function ChatPanel({
                             variant="ghost"
                             disabled={!inputValue.trim() || isLoading}
                             className={cn(
-                                "rounded-full hover:bg-primary/10 transition-colors",
+                                "rounded-full hover:bg-primary/10 transition-colors flex-shrink-0",
                                 inputValue.trim() && !isLoading
                                     ? "text-primary"
                                     : "text-muted-foreground"
