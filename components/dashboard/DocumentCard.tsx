@@ -98,7 +98,7 @@ export default function DocumentCard({
                             onClick={() =>
                                 onDelete({
                                     containerName: "pdf-chat",
-                                    blobName: doc.name,
+                                    blobName: doc.id,
                                 })
                             }
                         >

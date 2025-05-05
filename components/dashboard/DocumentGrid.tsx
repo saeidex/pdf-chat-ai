@@ -20,6 +20,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 import { hc } from "@/lib/honoClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
@@ -76,11 +77,22 @@ export default function DocumentGrid() {
 
             return data;
         },
-        onSuccess: () => {
+        onSuccess: ({ message }) => {
             queryClient.invalidateQueries({
                 queryKey: ["documents"],
             });
             setDeleteDialogOpen(false);
+            toast({
+                title: message,
+            });
+        },
+        onError: () => {
+            setDeleteDialogOpen(false);
+            toast({
+                title: "Error deleting document",
+                description: "Please try again later.",
+                variant: "destructive",
+            });
         },
     });
 
@@ -109,12 +121,12 @@ export default function DocumentGrid() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <UploadCard />
 
-                {documents.map((doc, index) => (
+                {documents.map((doc) => (
                     <DocumentCard
                         key={doc.name}
                         document={{
                             id: doc.name,
-                            name: doc.name,
+                            name: doc.name.split("--")[1],
                             path: doc.name,
                             lastAccessAt: new Date().toISOString(),
                         }}

@@ -160,7 +160,14 @@ const router = createRouter()
                 blobServiceClient.getContainerClient(containerName);
             const blobClient = containerClient.getBlobClient(blobName);
 
-            await blobClient.deleteIfExists();
+            const res = await blobClient.deleteIfExists();
+
+            if (!res.succeeded) {
+                return c.json(
+                    { message: "Blob not found or already deleted." },
+                    404
+                );
+            }
 
             return c.json({ message: "Blob deleted successfully." });
         }

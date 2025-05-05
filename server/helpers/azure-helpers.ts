@@ -8,6 +8,5 @@ export function generateBlobNameWithTimestamp(
     timestamp: Date
 ): string {
     const timestampString = timestamp.toISOString().replace(/[:.]/g, "-");
-    const fileExtension = originalName.split(".").pop();
-    return `${timestampString}-${originalName}.${fileExtension}`;
+    return `${timestampString}--${originalName}`;
 }
