@@ -1,9 +1,11 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import QueryClientProvider from "@/components/query-client-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -48,14 +50,17 @@ export default function RootLayout({
         <ClerkProvider>
             <html lang="en" suppressHydrationWarning>
                 <body className={inter.className}>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="dark"
-                        enableSystem={false}
-                    >
-                        {children}
-                        <Toaster />
-                    </ThemeProvider>
+                    <QueryClientProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="dark"
+                            enableSystem={false}
+                        >
+                            {children}
+                            <Toaster />
+                        </ThemeProvider>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                    </QueryClientProvider>
                 </body>
             </html>
         </ClerkProvider>

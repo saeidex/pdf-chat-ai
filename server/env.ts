@@ -32,7 +32,7 @@ const EnvSchema = z.object({
     AZURE_BLOB_URL: z
         .string()
         .default(
-            `https://${process.env.AZURE_BLOB_CONTAINER_NAME}.blob.core.windows.net`
+            `https://${process.env.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`
         ),
 });
 

@@ -1,3 +1,4 @@
+import * as HttpStatusCodes from "stoker/http-status-codes";
 import env from "@/server/env";
 import { createRouter } from "@/server/lib/create-app";
 import {
@@ -41,6 +42,7 @@ const router = createRouter()
         ),
         async (c) => {
             const { containerName, blobName, file } = c.req.valid("form");
+
             const containerClient =
                 blobServiceClient.getContainerClient(containerName);
             await containerClient.createIfNotExists();
@@ -57,7 +59,7 @@ const router = createRouter()
                 blobHTTPHeaders: { blobContentType: file.type },
             });
 
-            c.json({
+            return c.json({
                 message: "Upload successful.",
                 blobName: blobNameWithTimestamp,
             });

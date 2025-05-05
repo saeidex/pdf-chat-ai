@@ -2,11 +2,10 @@
 
 import { cn } from "@/lib/utils";
 import { UserButton } from "@clerk/nextjs";
-import { FileText, Search } from "lucide-react";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ModeToggle } from "../common/ModeToggle";
-import { Input } from "../ui/input";
 
 export default function DashboardNavbar() {
     const [isScrolled, setIsScrolled] = useState(false);
