@@ -4,7 +4,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import {
     FileText,
@@ -18,16 +19,20 @@ import Link from "next/link";
 interface Document {
     id: string;
     name: string;
-    createdAt: string;
-    updatedAt: string;
-    preview: string;
+    lastAccessAt: string;
     path: string;
 }
 
 interface DocumentCardProps {
     document: Document;
     onRename: (doc: Document) => void;
-    onDelete: (doc: Document) => void;
+    onDelete: ({
+        containerName,
+        blobName,
+    }: {
+        containerName: string;
+        blobName: string;
+    }) => void;
 }
 
 export default function DocumentCard({
@@ -60,7 +65,7 @@ export default function DocumentCard({
                 <div className="overflow-hidden">
                     <h3 className="font-medium truncate">{doc.name}</h3>
                     <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(doc.updatedAt), {
+                        {formatDistanceToNow(new Date(doc.lastAccessAt), {
                             addSuffix: true,
                         })}
                     </p>
@@ -80,14 +85,22 @@ export default function DocumentCard({
                                 Chat with PDF
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onRename(doc)}>
+                        <DropdownMenuItem
+                            disabled
+                            onClick={() => onRename(doc)}
+                        >
                             <Pencil className="h-4 w-4 mr-2" />
                             Rename
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => onDelete(doc)}
+                            onClick={() =>
+                                onDelete({
+                                    containerName: "pdf-chat",
+                                    blobName: doc.name,
+                                })
+                            }
                         >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete

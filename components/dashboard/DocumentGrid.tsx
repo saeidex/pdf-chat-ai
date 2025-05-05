@@ -20,43 +20,34 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { hc } from "@/lib/honoClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InferRequestType, InferResponseType } from "hono";
 import { useState } from "react";
 import DocumentCard from "./DocumentCard";
 import UploadCard from "./DocumentUploadCard";
 
-const initialDocuments = [
-    {
-        id: "1",
-        name: "A half-hour to learn Rust",
-        createdAt: "2025-04-15T10:30:00Z",
-        updatedAt: "2025-04-15T10:30:00Z",
-        preview: "/previews/rust-preview.png",
-        path: "/mock-pdf/A half-hour to learn Rust.pdf",
-    },
-    {
-        id: "2",
-        name: "Chapter-9 Polymorphism",
-        createdAt: "2025-04-20T14:45:00Z",
-        updatedAt: "2025-04-20T14:45:00Z",
-        preview: "/previews/polymorphism-preview.png",
-        path: "/mock-pdf/Chapter-9 Polymorphism.pptx.pdf",
-    },
-    {
-        id: "3",
-        name: "Mozilla Documentation",
-        createdAt: "2025-04-28T09:15:00Z",
-        updatedAt: "2025-04-28T09:15:00Z",
-        preview: "/previews/mozilla-preview.png",
-        path: "/mock-pdf/mozilla.pdf",
-    },
-];
-
 export default function DocumentGrid() {
-    const [documents, setDocuments] = useState(initialDocuments);
     const [renameDialogOpen, setRenameDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
     const [newName, setNewName] = useState("");
+
+    const { data: documents } = useQuery<
+        InferResponseType<typeof hc.list.$get>
+    >({
+        queryKey: ["documents"],
+        queryFn: async () => {
+            const res = await hc.list.$get({
+                query: {
+                    containerName: "pdf-chat",
+                },
+            });
+
+            return res.json();
+        },
+        initialData: [],
+    });
 
     const handleRename = (doc: any) => {
         setSelectedDocument(doc);
@@ -64,25 +55,49 @@ export default function DocumentGrid() {
         setRenameDialogOpen(true);
     };
 
-    const handleDelete = (doc: any) => {
-        setSelectedDocument(doc);
-        setDeleteDialogOpen(true);
-    };
+    const queryClient = useQueryClient();
+    const $delete = hc.delete.$delete;
+
+    const { mutate: handleDelete } = useMutation<
+        InferResponseType<typeof $delete>,
+        unknown,
+        InferRequestType<typeof $delete>["query"]
+    >({
+        mutationFn: async (query) => {
+            const res = await $delete({
+                query,
+            });
+
+            const data = await res.json();
+
+            if (res.status !== 200) {
+                throw new Error(data.message);
+            }
+
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["documents"],
+            });
+            setDeleteDialogOpen(false);
+        },
+    });
 
     const confirmRename = () => {
-        setDocuments((docs) =>
-            docs.map((doc) =>
-                doc.id === selectedDocument.id ? { ...doc, name: newName } : doc
-            )
-        );
-        setRenameDialogOpen(false);
+        // setDocuments((docs) =>
+        //     docs.map((doc) =>
+        //         doc.id === selectedDocument.id ? { ...doc, name: newName } : doc
+        //     )
+        // );
+        // setRenameDialogOpen(false);
     };
 
     const confirmDelete = () => {
-        setDocuments((docs) =>
-            docs.filter((doc) => doc.id !== selectedDocument.id)
-        );
-        setDeleteDialogOpen(false);
+        // setDocuments((docs) =>
+        //     docs.filter((doc) => doc.id !== selectedDocument.id)
+        // );
+        // setDeleteDialogOpen(false);
     };
 
     return (
@@ -96,10 +111,17 @@ export default function DocumentGrid() {
 
                 {documents.map((doc, index) => (
                     <DocumentCard
-                        key={doc.id}
-                        document={doc}
+                        key={doc.name}
+                        document={{
+                            id: doc.name,
+                            name: doc.name,
+                            path: doc.name,
+                            lastAccessAt: new Date().toISOString(),
+                        }}
                         onRename={handleRename}
-                        onDelete={handleDelete}
+                        onDelete={({ containerName, blobName }) =>
+                            handleDelete({ containerName, blobName })
+                        }
                     />
                 ))}
             </div>

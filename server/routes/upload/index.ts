@@ -1,4 +1,3 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
 import env from "@/server/env";
 import { createRouter } from "@/server/lib/create-app";
 import {
@@ -16,6 +15,7 @@ import {
     generateBlobNameWithTimestamp,
     isValidContainerName,
 } from "@/server/helpers/azure-helpers";
+import { logger } from "@/server/lib/logger";
 
 const blobServiceClient = new BlobServiceClient(
     env.AZURE_BLOB_URL,
@@ -137,7 +137,7 @@ const router = createRouter()
                 blobServiceClient.credential as any
             ).toString();
 
-            c.json({ sasUrl: `${blobClient.url}?${sasToken}` });
+            return c.json({ sasUrl: `${blobClient.url}?${sasToken}` });
         }
     )
     .delete(
@@ -162,7 +162,7 @@ const router = createRouter()
 
             await blobClient.deleteIfExists();
 
-            c.json({ message: "Blob deleted successfully." });
+            return c.json({ message: "Blob deleted successfully." });
         }
     )
     .get(
@@ -192,7 +192,7 @@ const router = createRouter()
                 ? new Date(sasExpiryTime)
                 : new Date(Date.now() + 3600 * 1000);
 
-            console.log("Query Parameters:", {
+            logger.debug("Query Parameters:", {
                 containerName,
                 prefix,
                 includeSasUri,
@@ -207,7 +207,7 @@ const router = createRouter()
                 ? new Date(sasExpiryTime)
                 : new Date(Date.now() + 3600 * 1000);
 
-            console.log("SAS Expiry Date:", expiryDate);
+            logger.debug("SAS Expiry Date:", expiryDate);
 
             for await (const blob of containerClient.listBlobsFlat({
                 prefix,
@@ -221,7 +221,7 @@ const router = createRouter()
                 };
 
                 if (includeSasUri === true && sasExpiryTime) {
-                    console.log("Generating sas:", sasExpiryTime);
+                    logger.debug("Generating sas:", sasExpiryTime);
                     const blobClient = containerClient.getBlobClient(blob.name);
                     const sasToken = generateBlobSASQueryParameters(
                         {
@@ -236,13 +236,13 @@ const router = createRouter()
                     ).toString();
 
                     blobDetails.sasUri = `${blobClient.url}?${sasToken}`;
-                    console.log("SAS URI:", blobDetails.sasUri);
+                    logger.debug("SAS URI:", blobDetails.sasUri);
                 }
 
                 blobs.push(blobDetails);
             }
 
-            c.json(blobs);
+            return c.json(blobs);
         }
     );
 
