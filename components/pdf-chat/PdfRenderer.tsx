@@ -7,7 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useResizeDetector } from "react-resize-detector";
 import SimpleBar from "simplebar-react";
+
 import "simplebar-react/dist/simplebar.min.css";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -115,8 +118,6 @@ export default function PdfRenderer({ url }: PdfRendererProps) {
                                     width={width ? width - 32 : undefined}
                                     scale={scale}
                                     rotate={rotation}
-                                    renderAnnotationLayer={false}
-                                    renderTextLayer={false}
                                     loading={() => (
                                         <div className="flex justify-center py-10">
                                             <Loader2 className="h-6 w-6 animate-spin" />
