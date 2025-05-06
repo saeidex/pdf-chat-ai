@@ -3,9 +3,11 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { cn } from "@/lib/utils";
 import { Bot, SendHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface Message {
     id: string;
@@ -32,24 +34,8 @@ export default function ChatPanel({ documentName }: ChatPanelProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Scroll to bottom of messages when messages change
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    // Auto-resize textarea based on content
-    useEffect(() => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const adjustHeight = () => {
-            textarea.style.height = "auto";
-            const newHeight = Math.min(textarea.scrollHeight, 150);
-            textarea.style.height = `${newHeight}px`;
-        };
-
-        adjustHeight();
-    }, [inputValue]);
+    useScrollToBottom(messagesEndRef, [messages]);
+    useAutoResizeTextarea(textareaRef, inputValue);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -109,7 +95,6 @@ export default function ChatPanel({ documentName }: ChatPanelProps) {
         }
     }
 
-    // Generates mock responses for demo purposes
     function generateMockResponse(
         message: string,
         documentName: string
@@ -144,105 +129,6 @@ export default function ChatPanel({ documentName }: ChatPanelProps) {
 
         return `Based on "${documentName}", I can tell you that the document contains information relevant to your query. You might find more specific details by asking about particular sections or concepts in the document.`;
     }
-
-    const MessageBubble = ({ message }: { message: Message }) => {
-        const isUser = message.sender === "user";
-
-        return (
-            <div
-                className={cn(
-                    "flex w-full mb-6 animate-in fade-in-0 slide-in-from-bottom-5 duration-300",
-                    isUser ? "justify-end" : "justify-start"
-                )}
-            >
-                <div
-                    className={cn(
-                        "flex items-start max-w-[85%] group",
-                        isUser ? "flex-row-reverse" : "flex-row"
-                    )}
-                >
-                    <div
-                        className={cn(
-                            "flex-shrink-0",
-                            isUser ? "ml-3" : "mr-3"
-                        )}
-                    >
-                        <Avatar
-                            className={cn(
-                                "border-2 h-8 w-8 flex items-center justify-center",
-                                isUser
-                                    ? "border-primary bg-primary/10"
-                                    : "border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800"
-                            )}
-                        >
-                            <div className="flex items-center justify-center w-full h-full">
-                                <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-                            </div>
-                        </Avatar>
-                    </div>
-
-                    <div>
-                        <div
-                            className={cn(
-                                "px-4 py-3 rounded-2xl mb-1 prose prose-sm max-w-none",
-                                isUser
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-zinc-100 dark:bg-zinc-800 text-foreground"
-                            )}
-                        >
-                            {message.content}
-                        </div>
-                        <div
-                            className={cn(
-                                "text-xs opacity-0 group-hover:opacity-70 transition-opacity px-2",
-                                isUser ? "text-right" : "text-left"
-                            )}
-                        >
-                            {message.timestamp.toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const TypingIndicator = () => (
-        <div className="flex items-start mb-6 animate-in fade-in-0 slide-in-from-bottom-3">
-            <Avatar className="h-8 w-8 mr-3 border-2 border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 flex items-center justify-center">
-                <div className="flex items-center justify-center w-full h-full">
-                    <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-                </div>
-            </Avatar>
-            <div className="px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center">
-                <div className="flex space-x-2">
-                    <div
-                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                        style={{
-                            animationDelay: "0ms",
-                            animationDuration: "1000ms",
-                        }}
-                    />
-                    <div
-                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                        style={{
-                            animationDelay: "150ms",
-                            animationDuration: "1000ms",
-                        }}
-                    />
-                    <div
-                        className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                        style={{
-                            animationDelay: "300ms",
-                            animationDuration: "1000ms",
-                        }}
-                    />
-                </div>
-            </div>
-        </div>
-    );
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-950 chat-gradient-bg">
@@ -301,3 +187,97 @@ export default function ChatPanel({ documentName }: ChatPanelProps) {
         </div>
     );
 }
+
+const MessageBubble = ({ message }: { message: Message }) => {
+    const isUser = message.sender === "user";
+
+    return (
+        <div
+            className={cn(
+                "flex w-full mb-6 animate-in fade-in-0 slide-in-from-bottom-5 duration-300",
+                isUser ? "justify-end" : "justify-start"
+            )}
+        >
+            <div
+                className={cn(
+                    "flex items-start max-w-[85%] group",
+                    isUser ? "flex-row-reverse" : "flex-row"
+                )}
+            >
+                <div className={cn("flex-shrink-0", isUser ? "ml-3" : "mr-3")}>
+                    <Avatar
+                        className={cn(
+                            "border-2 h-8 w-8 flex items-center justify-center",
+                            isUser
+                                ? "border-primary bg-primary/10"
+                                : "border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800"
+                        )}
+                    >
+                        <div className="flex items-center justify-center w-full h-full">
+                            <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+                        </div>
+                    </Avatar>
+                </div>
+
+                <div>
+                    <div
+                        className={cn(
+                            "px-4 py-3 rounded-2xl mb-1 prose prose-sm max-w-none",
+                            isUser
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-zinc-100 dark:bg-zinc-800 text-foreground"
+                        )}
+                    >
+                        {message.content}
+                    </div>
+                    <div
+                        className={cn(
+                            "text-xs opacity-0 group-hover:opacity-70 transition-opacity px-2",
+                            isUser ? "text-right" : "text-left"
+                        )}
+                    >
+                        {message.timestamp.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const TypingIndicator = () => (
+    <div className="flex items-start mb-6 animate-in fade-in-0 slide-in-from-bottom-3">
+        <Avatar className="h-8 w-8 mr-3 border-2 border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 flex items-center justify-center">
+            <div className="flex items-center justify-center w-full h-full">
+                <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+            </div>
+        </Avatar>
+        <div className="px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center">
+            <div className="flex space-x-2">
+                <div
+                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                    style={{
+                        animationDelay: "0ms",
+                        animationDuration: "1000ms",
+                    }}
+                />
+                <div
+                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                    style={{
+                        animationDelay: "150ms",
+                        animationDuration: "1000ms",
+                    }}
+                />
+                <div
+                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
+                    style={{
+                        animationDelay: "300ms",
+                        animationDuration: "1000ms",
+                    }}
+                />
+            </div>
+        </div>
+    </div>
+);
