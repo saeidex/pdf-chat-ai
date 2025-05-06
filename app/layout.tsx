@@ -53,7 +53,7 @@ export default function RootLayout({
                     <QueryClientProvider>
                         <ThemeProvider
                             attribute="class"
-                            defaultTheme="dark"
+                            defaultTheme="system"
                             enableSystem={false}
                         >
                             {children}

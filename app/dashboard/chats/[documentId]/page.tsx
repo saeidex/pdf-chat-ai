@@ -1,5 +1,6 @@
 "use client";
 
+import { ModeToggle } from "@/components/common/ModeToggle";
 import ChatPanel from "@/components/pdf-chat/ChatPanel";
 import PdfRenderer from "@/components/pdf-chat/PdfRenderer";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { hc } from "@/lib/honoClient";
+import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { ChevronLeft, Loader2 } from "lucide-react";
@@ -84,6 +86,17 @@ export default function PDFChatPage() {
                 <h1 className="text-xl font-semibold ml-2 truncate">
                     {document.name}
                 </h1>
+                <div className="flex ml-auto items-center space-x-4 pr-4">
+                    <ModeToggle />
+                    <UserButton
+                        afterSignOutUrl="/"
+                        appearance={{
+                            elements: {
+                                avatarBox: "h-8 w-8",
+                            },
+                        }}
+                    />
+                </div>
             </div>
             <ResizablePanelGroup
                 direction="horizontal"
