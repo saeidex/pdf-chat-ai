@@ -92,7 +92,6 @@ export default function UploadCard() {
             uploadMutation.mutate({
                 file,
                 containerName: "pdf-chat",
-                blobName: file.name,
             });
         }
     };

@@ -123,12 +123,12 @@ export default function DocumentGrid() {
 
                 {documents.map((doc) => (
                     <DocumentCard
-                        key={doc.name}
+                        key={doc.id}
                         document={{
-                            id: doc.name,
-                            name: doc.name.split("--")[1],
-                            path: doc.name,
-                            lastAccessAt: new Date().toISOString(),
+                            id: doc.id,
+                            name: doc.name,
+                            path: doc.id,
+                            lastAccessAt: doc.lastModified,
                         }}
                         onRename={handleRename}
                         onDelete={({ containerName, blobName }) =>

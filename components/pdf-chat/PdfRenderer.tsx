@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
 import { useResizeDetector } from "react-resize-detector";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
@@ -24,6 +22,8 @@ const scale = 1.0 as const;
 const rotation = 0 as const;
 
 export default function PdfRenderer({ url }: PdfRendererProps) {
+    console.log("PDF URL:", url);
+
     const [numPages, setNumPages] = useState<number>(0);
     const [isDocumentLoading, setIsDocumentLoading] = useState(true);
     const [isResizing, setIsResizing] = useState(false);
@@ -115,6 +115,8 @@ export default function PdfRenderer({ url }: PdfRendererProps) {
                                     width={width ? width - 32 : undefined}
                                     scale={scale}
                                     rotate={rotation}
+                                    renderAnnotationLayer={false}
+                                    renderTextLayer={false}
                                     loading={() => (
                                         <div className="flex justify-center py-10">
                                             <Loader2 className="h-6 w-6 animate-spin" />

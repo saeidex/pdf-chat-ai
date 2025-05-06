@@ -8,47 +8,46 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { hc } from "@/lib/honoClient";
+import { useQuery } from "@tanstack/react-query";
+import { InferResponseType } from "hono";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function PDFChatPage() {
     const { documentId } = useParams();
-    const [document, setDocument] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
 
-    // Mock function to fetch document data based on ID
-    useEffect(() => {
-        // In a real application, you would fetch the document from an API
-        const mockDocuments = [
-            {
-                id: "1",
-                name: "A half-hour to learn Rust",
-                path: "/mock-pdf/A half-hour to learn Rust.pdf",
-            },
-            {
-                id: "2",
-                name: "Chapter-9 Polymorphism",
-                path: "/mock-pdf/Chapter-9 Polymorphism.pptx.pdf",
-            },
-            {
-                id: "3",
-                name: "Mozilla Documentation",
-                path: "/mock-pdf/mozilla.pdf",
-            },
-        ];
+    const $get = hc.sas.$get;
 
-        const foundDoc = mockDocuments.find((doc) => doc.id === documentId);
+    const { data: document, isLoading } = useQuery<
+        InferResponseType<typeof $get>
+    >({
+        queryKey: ["document", documentId],
+        queryFn: async () => {
+            const response = await $get({
+                query: {
+                    containerName: "pdf-chat",
+                    blobName: documentId as string,
+                    expiryTime: new Date(
+                        Date.now() + 1000 * 60 * 60 * 24
+                    ).toISOString(),
+                },
+            });
 
-        // Simulate loading
-        setTimeout(() => {
-            setDocument(foundDoc || null);
-            setLoading(false);
-        }, 1000);
-    }, [documentId]);
+            const data = await response.json();
 
-    if (loading) {
+            if (response.status !== 200) {
+                throw new Error("Document not found");
+            }
+
+            return data;
+        },
+        staleTime: 0,
+        gcTime: 0,
+    });
+
+    if (isLoading) {
         return (
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin mb-2" />
@@ -91,14 +90,11 @@ export default function PDFChatPage() {
                 className="flex-grow rounded-lg border"
             >
                 <ResizablePanel defaultSize={60} minSize={30}>
-                    <PdfRenderer url={document.path} />
+                    <PdfRenderer url={document.sasUrl} />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={40} minSize={25}>
-                    <ChatPanel
-                        documentId={documentId as string}
-                        documentName={document.name}
-                    />
+                    <ChatPanel documentName={document.name} />
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>

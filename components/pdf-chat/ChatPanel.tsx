@@ -15,14 +15,10 @@ interface Message {
 }
 
 interface ChatPanelProps {
-    documentId: string;
     documentName: string;
 }
 
-export default function ChatPanel({
-    documentId,
-    documentName,
-}: ChatPanelProps) {
+export default function ChatPanel({ documentName }: ChatPanelProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "welcome",

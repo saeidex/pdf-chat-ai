@@ -1,5 +1,11 @@
 import env from "@/server/env";
+import {
+    generateBlobNameWithTimestamp,
+    getOriginalFilenameFromBlobName,
+    isValidContainerName,
+} from "@/server/helpers/azure-helpers";
 import { createRouter } from "@/server/lib/create-app";
+import { logger } from "@/server/lib/logger";
 import {
     BlobSASPermissions,
     BlobServiceClient,
@@ -8,14 +14,7 @@ import {
     StorageSharedKeyCredential,
 } from "@azure/storage-blob";
 import { zValidator } from "@hono/zod-validator";
-import { stream } from "hono/streaming";
 import { z } from "zod";
-
-import {
-    generateBlobNameWithTimestamp,
-    isValidContainerName,
-} from "@/server/helpers/azure-helpers";
-import { logger } from "@/server/lib/logger";
 
 const blobServiceClient = new BlobServiceClient(
     env.AZURE_BLOB_URL,
@@ -33,7 +32,6 @@ const router = createRouter()
             z
                 .object({
                     containerName: z.string().min(3).max(63),
-                    blobName: z.string().min(1),
                     file: z.instanceof(File),
                 })
                 .refine((data) => isValidContainerName(data.containerName), {
@@ -41,14 +39,14 @@ const router = createRouter()
                 })
         ),
         async (c) => {
-            const { containerName, blobName, file } = c.req.valid("form");
+            const { containerName, file } = c.req.valid("form");
 
             const containerClient =
                 blobServiceClient.getContainerClient(containerName);
             await containerClient.createIfNotExists();
 
             const blobNameWithTimestamp = generateBlobNameWithTimestamp(
-                blobName,
+                file.name,
                 new Date()
             );
             const blobClient = containerClient.getBlockBlobClient(
@@ -66,43 +64,6 @@ const router = createRouter()
         }
     )
     .get(
-        "/download",
-        zValidator(
-            "query",
-            z
-                .object({
-                    containerName: z.string().min(3).max(63),
-                    blobName: z.string().min(1),
-                })
-                .refine((data) => isValidContainerName(data.containerName), {
-                    message: "Invalid container name.",
-                })
-        ),
-        async (c) => {
-            const { containerName, blobName } = c.req.valid("query");
-
-            const containerClient =
-                blobServiceClient.getContainerClient(containerName);
-            const blobClient = containerClient.getBlobClient(blobName);
-
-            const downloadBlockBlobResponse = await blobClient.download();
-            const readableStreamBody =
-                downloadBlockBlobResponse.readableStreamBody;
-
-            c.header("Content-Disposition", `attachment; filename=${blobName}`);
-
-            return stream(c, async (stream) => {
-                if (readableStreamBody) {
-                    readableStreamBody;
-                } else {
-                    throw new Error(
-                        "Failed to download file: stream is undefined"
-                    );
-                }
-            });
-        }
-    )
-    .get(
         "/sas",
         zValidator(
             "query",
@@ -110,7 +71,7 @@ const router = createRouter()
                 .object({
                     containerName: z.string().min(3).max(63),
                     blobName: z.string().min(1),
-                    expiryTime: z.date(),
+                    expiryTime: z.string(),
                 })
                 .refine((data) => isValidContainerName(data.containerName), {
                     message: "Invalid container name.",
@@ -130,14 +91,20 @@ const router = createRouter()
                     containerName,
                     blobName,
                     permissions: BlobSASPermissions.parse("r"),
-                    protocol: SASProtocol.HttpsAndHttp,
+                    protocol: SASProtocol.Https,
                     startsOn: new Date(),
                     expiresOn: expiryDate,
                 },
-                blobServiceClient.credential as any
+                new StorageSharedKeyCredential(
+                    env.AZURE_STORAGE_ACCOUNT_NAME,
+                    env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
+                )
             ).toString();
 
-            return c.json({ sasUrl: `${blobClient.url}?${sasToken}` });
+            return c.json({
+                sasUrl: `${blobClient.url}?${sasToken}`,
+                name: getOriginalFilenameFromBlobName(blobName),
+            });
         }
     )
     .delete(
@@ -172,6 +139,27 @@ const router = createRouter()
             return c.json({ message: "Blob deleted successfully." });
         }
     )
+    // .get("/download", async (c) => {
+    //     const { containerName, blobName } = c.req.query();
+
+    //     const containerClient =
+    //         blobServiceClient.getContainerClient(containerName);
+    //     const blobClient = containerClient.getBlobClient(blobName);
+
+    //     const downloadBlockBlobResponse = await blobClient.download();
+    //     const stream = downloadBlockBlobResponse.readableStreamBody;
+
+    //     c.res.headers.set(
+    //         "Content-Type",
+    //         downloadBlockBlobResponse.contentType!
+    //     );
+    //     c.res.headers.set(
+    //         "Content-Disposition",
+    //         `attachment; filename=${blobName}`
+    //     );
+
+    //     stream.pipe()
+    // })
     .get(
         "/list",
         zValidator(
@@ -220,8 +208,10 @@ const router = createRouter()
                 prefix,
             })) {
                 const blobDetails = {
-                    name: blob.name,
-                    createdOn: blob.properties.createdOn,
+                    id: blob.name,
+                    name: getOriginalFilenameFromBlobName(blob.name),
+                    createdAt: blob.properties.createdOn,
+                    lastModified: blob.properties.lastModified,
                     metadata: blob.metadata,
                     contentType: blob.properties.contentType,
                     sasUri: "",
