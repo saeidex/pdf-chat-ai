@@ -127,7 +127,6 @@ export default function DocumentGrid() {
                         document={{
                             id: doc.id,
                             name: doc.name,
-                            path: doc.id,
                             lastAccessAt: doc.lastModified,
                         }}
                         onRename={handleRename}

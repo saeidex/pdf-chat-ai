@@ -5,7 +5,6 @@ import {
     isValidContainerName,
 } from "@/server/helpers/azure-helpers";
 import { createRouter } from "@/server/lib/create-app";
-import { logger } from "@/server/lib/logger";
 import {
     BlobSASPermissions,
     BlobServiceClient,
@@ -183,26 +182,10 @@ const router = createRouter()
                 sasExpiryTime,
             } = c.req.valid("query");
 
-            const sasET = sasExpiryTime
-                ? new Date(sasExpiryTime)
-                : new Date(Date.now() + 3600 * 1000);
-
-            logger.debug("Query Parameters:", {
-                containerName,
-                prefix,
-                includeSasUri,
-                sasET,
-            });
-
             const containerClient =
                 blobServiceClient.getContainerClient(containerName);
 
             const blobs = [];
-            const expiryDate = sasExpiryTime
-                ? new Date(sasExpiryTime)
-                : new Date(Date.now() + 3600 * 1000);
-
-            logger.debug("SAS Expiry Date:", expiryDate);
 
             for await (const blob of containerClient.listBlobsFlat({
                 prefix,
@@ -217,8 +200,7 @@ const router = createRouter()
                     sasUri: "",
                 };
 
-                if (includeSasUri === true && sasExpiryTime) {
-                    logger.debug("Generating sas:", sasExpiryTime);
+                if (includeSasUri === true) {
                     const blobClient = containerClient.getBlobClient(blob.name);
                     const sasToken = generateBlobSASQueryParameters(
                         {
@@ -227,13 +209,14 @@ const router = createRouter()
                             permissions: BlobSASPermissions.parse("r"),
                             protocol: SASProtocol.HttpsAndHttp,
                             startsOn: new Date(),
-                            expiresOn: expiryDate,
+                            expiresOn: sasExpiryTime
+                                ? new Date(sasExpiryTime)
+                                : new Date(Date.now() + 3600 * 1000),
                         },
                         blobServiceClient.credential as any
                     ).toString();
 
                     blobDetails.sasUri = `${blobClient.url}?${sasToken}`;
-                    logger.debug("SAS URI:", blobDetails.sasUri);
                 }
 
                 blobs.push(blobDetails);

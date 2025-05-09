@@ -20,7 +20,6 @@ interface Document {
     id: string;
     name: string;
     lastAccessAt: string;
-    path: string;
 }
 
 interface DocumentCardProps {
