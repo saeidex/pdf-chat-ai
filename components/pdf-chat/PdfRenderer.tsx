@@ -3,17 +3,18 @@
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs";
 import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useResizeDetector } from "react-resize-detector";
 import SimpleBar from "simplebar-react";
 
-import "simplebar-react/dist/simplebar.min.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import "simplebar-react/dist/simplebar.min.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
+    pdfWorker,
     import.meta.url
 ).toString();
 

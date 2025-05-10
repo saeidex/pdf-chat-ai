@@ -2,12 +2,27 @@
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
+import { useToast } from "@/hooks/use-toast";
+import { hc } from "@/lib/honoClient";
 import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { InferRequestType, InferResponseType } from "hono";
 import { Bot, SendHorizontal } from "lucide-react";
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Markdown } from "./Markdown";
+import TypingIndicator from "./TypingIndicator";
 
 interface Message {
     id: string;
@@ -17,71 +32,115 @@ interface Message {
 }
 
 interface ChatPanelProps {
-    documentName: string;
+    docName: string;
+    docUrl: string;
 }
 
-export default function ChatPanel({ documentName }: ChatPanelProps) {
+const formSchema = z.object({
+    prompt: z.string().min(1, "Message cannot be empty"),
+    docUrl: z.string().url("Invalid URL"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export default function ChatPanel({ docName, docUrl }: ChatPanelProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "welcome",
-            content: `Hello! I'm your PDF assistant. I'm ready to help you with "${documentName}". What would you like to know about this document?`,
             sender: "assistant",
             timestamp: new Date(),
+            content: `Hello! I'm your PDF assistant. I'm ready to help you with "${docName}". What would you like to know about this document?`,
         },
     ]);
-    const [inputValue, setInputValue] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const { toast } = useToast();
 
     useScrollToBottom(messagesEndRef, [messages]);
-    useAutoResizeTextarea(textareaRef, inputValue);
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
+    const form = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            prompt: "",
+            docUrl,
+        },
+    });
 
-        if (!inputValue.trim() || isLoading) return;
+    const [isStreaming, setIsStreaming] = useState(false);
 
-        const userMessage: Message = {
-            id: `user-${Date.now()}`,
-            content: inputValue.trim(),
-            sender: "user",
-            timestamp: new Date(),
-        };
+    const $post = hc.chats.$post;
+    const { mutate, isPending } = useMutation<
+        InferResponseType<typeof $post>,
+        Error,
+        InferRequestType<typeof $post>["form"]
+    >({
+        mutationFn: async (values: FormValues) => {
+            const userMessageId = `user-${Date.now()}`;
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: userMessageId,
+                    content: values.prompt,
+                    sender: "user",
+                    timestamp: new Date(),
+                },
+            ]);
 
-        setMessages((prev) => [...prev, userMessage]);
-        setInputValue("");
-        setIsLoading(true);
-
-        try {
-            // In a real app, you would call your API here
-            // const response = await fetch('/api/chat', {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify({ message: userMessage.content, documentId }),
-            // });
-            // const data = await response.json();
-
-            // For demo purposes, we'll simulate a response
-            setTimeout(() => {
-                const botResponse: Message = {
-                    id: `assistant-${Date.now()}`,
-                    content: generateMockResponse(
-                        userMessage.content,
-                        documentName
-                    ),
+            const assistantMessageId = `assistant-${Date.now()}`;
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: assistantMessageId,
+                    content: "",
                     sender: "assistant",
                     timestamp: new Date(),
-                };
+                },
+            ]);
 
-                setMessages((prev) => [...prev, botResponse]);
-                setIsLoading(false);
-            }, 1500);
-        } catch (error) {
-            console.error("Error sending message:", error);
-            setIsLoading(false);
+            const response = await $post({
+                form: values,
+            });
 
-            // Add error message
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error: ${response.status} - ${errorText}`);
+            }
+
+            if (response.body) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let streamedContent = "";
+                setIsStreaming(true);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    streamedContent += chunk;
+
+                    setMessages((prevMessages) =>
+                        prevMessages.map((msg) =>
+                            msg.id === assistantMessageId
+                                ? { ...msg, content: streamedContent }
+                                : msg
+                        )
+                    );
+                }
+            }
+
+            return "";
+        },
+        onSuccess: () => {
+            form.reset();
+            setIsStreaming(false);
+        },
+        onError: (error) => {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+
             setMessages((prev) => [
                 ...prev,
                 {
@@ -92,97 +151,88 @@ export default function ChatPanel({ documentName }: ChatPanelProps) {
                     timestamp: new Date(),
                 },
             ]);
+        },
+    });
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            form.handleSubmit((values) => mutate(values))();
         }
-    }
-
-    function generateMockResponse(
-        message: string,
-        documentName: string
-    ): string {
-        const lowerMessage = message.toLowerCase();
-
-        if (
-            lowerMessage.includes("summary") ||
-            lowerMessage.includes("summarize")
-        ) {
-            return `This document "${documentName}" covers key concepts related to the subject matter. It contains several sections including introduction, methodology, and conclusion. The main points discuss techniques, approaches, and findings relevant to the domain.`;
-        }
-
-        if (
-            lowerMessage.includes("author") ||
-            lowerMessage.includes("who wrote")
-        ) {
-            return `The document "${documentName}" appears to be authored by a subject matter expert in the field. However, I cannot provide the specific author name as this information might not be available in the content I can access.`;
-        }
-
-        if (
-            lowerMessage.includes("page") &&
-            (lowerMessage.includes("count") ||
-                lowerMessage.includes("how many"))
-        ) {
-            return `This document contains multiple pages with detailed information. The exact page count would be visible in the PDF viewer on the left side.`;
-        }
-
-        if (lowerMessage.includes("hello") || lowerMessage.includes("hi ")) {
-            return `Hello there! How can I help you understand the document "${documentName}" better?`;
-        }
-
-        return `Based on "${documentName}", I can tell you that the document contains information relevant to your query. You might find more specific details by asking about particular sections or concepts in the document.`;
-    }
+    };
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-950 chat-gradient-bg">
             <div className="flex-grow overflow-y-auto p-4 md:p-6 scrollbar-thin">
                 <div className="space-y-2 max-w-3xl mx-auto">
-                    {messages.map((message) => (
-                        <MessageBubble key={message.id} message={message} />
-                    ))}
+                    {messages.map((message, index) => {
+                        if (
+                            isPending &&
+                            message.sender === "assistant" &&
+                            !message.content &&
+                            index === messages.length - 1
+                        ) {
+                            return null;
+                        }
+                        return (
+                            <MessageBubble key={message.id} message={message} />
+                        );
+                    })}
 
-                    {isLoading && <TypingIndicator key="typing-indicator" />}
+                    {isPending && !isStreaming && (
+                        <TypingIndicator key="typing-indicator" />
+                    )}
                 </div>
                 <div ref={messagesEndRef} />
             </div>
 
             <div className="p-4 border-t bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky bottom-0 z-10 animate-in slide-in-from-bottom-5 duration-300">
-                <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-                    <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 rounded-t-2xl border border-zinc-200 dark:border-zinc-800 px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-sm transition-all duration-200">
-                        <Textarea
-                            ref={textareaRef}
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    if (inputValue.trim() && !isLoading) {
-                                        handleSubmit(e);
-                                    }
-                                }
-                            }}
-                            placeholder="Ask a question about this document..."
-                            disabled={isLoading}
-                            className="flex-grow border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent resize-none min-h-0 py-2 h-10 max-h-32 overflow-auto scrollbar-thin"
-                            style={{
-                                overflowY: "auto",
-                                lineHeight: "1.5",
-                            }}
-                            rows={1}
-                        />
-                        <Button
-                            type="submit"
-                            size="icon"
-                            variant="ghost"
-                            disabled={!inputValue.trim() || isLoading}
-                            className={cn(
-                                "rounded-full hover:bg-primary/10 transition-colors flex-shrink-0",
-                                inputValue.trim() && !isLoading
-                                    ? "text-primary"
-                                    : "text-muted-foreground"
-                            )}
-                        >
-                            <SendHorizontal className="h-5 w-5" />
-                        </Button>
-                    </div>
-                </form>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit((values) => mutate(values))}
+                        className="max-w-3xl mx-auto"
+                    >
+                        <div className="flex items-center space-x-2 bg-white dark:bg-zinc-900 rounded-t-2xl border border-zinc-200 dark:border-zinc-800 px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary shadow-sm transition-all duration-200">
+                            <FormField
+                                control={form.control}
+                                name="prompt"
+                                render={({ field }) => (
+                                    <FormItem className="flex-grow">
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                onKeyDown={handleKeyDown}
+                                                placeholder="Ask a question about this document..."
+                                                disabled={isPending}
+                                                className="flex-grow border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent resize-none min-h-0 py-2 h-10 max-h-32 overflow-auto scrollbar-thin"
+                                                style={{
+                                                    overflowY: "auto",
+                                                    lineHeight: "1.5",
+                                                }}
+                                                rows={1}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button
+                                type="submit"
+                                size="icon"
+                                variant="ghost"
+                                disabled={isPending || !form.formState.isValid}
+                                className={cn(
+                                    "rounded-full hover:bg-primary/10 transition-colors flex-shrink-0",
+                                    form.formState.isValid && !isPending
+                                        ? "text-primary"
+                                        : "text-muted-foreground"
+                                )}
+                            >
+                                <SendHorizontal className="h-5 w-5" />
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </div>
         </div>
     );
@@ -228,7 +278,11 @@ const MessageBubble = ({ message }: { message: Message }) => {
                                 : "bg-zinc-100 dark:bg-zinc-800 text-foreground"
                         )}
                     >
-                        {message.content}
+                        {isUser ? (
+                            message.content
+                        ) : (
+                            <Markdown content={message.content} />
+                        )}
                     </div>
                     <div
                         className={cn(
@@ -246,38 +300,3 @@ const MessageBubble = ({ message }: { message: Message }) => {
         </div>
     );
 };
-
-const TypingIndicator = () => (
-    <div className="flex items-start mb-6 animate-in fade-in-0 slide-in-from-bottom-3">
-        <Avatar className="h-8 w-8 mr-3 border-2 border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 flex items-center justify-center">
-            <div className="flex items-center justify-center w-full h-full">
-                <Bot className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-            </div>
-        </Avatar>
-        <div className="px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center">
-            <div className="flex space-x-2">
-                <div
-                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                    style={{
-                        animationDelay: "0ms",
-                        animationDuration: "1000ms",
-                    }}
-                />
-                <div
-                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                    style={{
-                        animationDelay: "150ms",
-                        animationDuration: "1000ms",
-                    }}
-                />
-                <div
-                    className="h-2.5 w-2.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
-                    style={{
-                        animationDelay: "300ms",
-                        animationDuration: "1000ms",
-                    }}
-                />
-            </div>
-        </div>
-    </div>
-);

@@ -25,6 +25,8 @@ const EnvSchema = z.object({
     ]),
     CLERK_PUBLISHABLE_KEY: z.string(),
     CLERK_SECRET_KEY: z.string(),
+
+    // AZURE Storage Account
     AZURE_STORAGE_ACCOUNT_CONNECTION_STRING: z.string(),
     AZURE_STORAGE_ACCOUNT_ACCESS_KEY: z.string(),
     AZURE_STORAGE_ACCOUNT_NAME: z.string(),
@@ -34,6 +36,18 @@ const EnvSchema = z.object({
         .default(
             `https://${process.env.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`
         ),
+
+    // Azure OpenAI
+    AZURE_OPENAI_API_ENDPOINT: z.string(),
+    AZURE_OPENAI_API_KEY: z.string(),
+    AZURE_OPENAI_DEPLOYMENT_NAME: z.string().default("gpt-4.1"),
+    AZURE_OPENAI_API_VERSION: z.string().default("2024-04-01-preview"),
+    AZURE_OPENAI_MODEL_NAME: z.string().default("gpt-4.1"),
+
+    // Azure AI Search
+    // AZURE_SEARCH_ENDPOINT: z.string(),
+    // AZURE_SEARCH_KEY: z.string(),
+    // AZURE_SEARCH_INDEX_NAME: z.string(),
 });
 
 export type env = z.infer<typeof EnvSchema>;

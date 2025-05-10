@@ -107,7 +107,10 @@ export default function PDFChatPage() {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={40} minSize={25}>
-                    <ChatPanel documentName={document.name} />
+                    <ChatPanel
+                        docName={document.name}
+                        docUrl={document.sasUrl}
+                    />
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>

@@ -14,6 +14,7 @@ const nextConfig = {
             canvas: "./empty-module.js",
         },
     },
+    serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
 };
 
 module.exports = nextConfig;
