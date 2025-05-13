@@ -11,7 +11,7 @@ const nextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      canvas: "./empty-module.js",
+      canvas: "./empty-module.mjs",
     },
   },
   serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
