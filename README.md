@@ -2,6 +2,15 @@
 
 PdfChat is an application that enables users to chat with their PDF documents using advanced AI. It extracts insights, answers questions, and analyzes the content of PDF documents instantly, eliminating the need for manual searching.
 
+## Preview
+
+![image](https://github.com/user-attachments/assets/6d3fa4a1-a753-4f1e-9fdb-389fb444271f)
+![image](https://github.com/user-attachments/assets/784649d9-8353-4a7d-8b42-233b76b5a2f4)
+![image](https://github.com/user-attachments/assets/16c7550f-68b9-4018-ad03-7e1878110473)
+![image](https://github.com/user-attachments/assets/5556daaf-4e85-4fdc-b3d3-16aa54d49db7)
+![image](https://github.com/user-attachments/assets/8bf609f7-d0aa-4f01-8403-2af4c6619223)
+
+
 ## Features
 
 - **PDF Document Upload**: Upload and manage your PDF documents securely
