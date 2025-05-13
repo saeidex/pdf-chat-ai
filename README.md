@@ -38,8 +38,8 @@ Before running the project locally, make sure you have:
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
-cd pdf-chat
+git clone https://github.com/saeidex/pdf-chat-ai --depth=1
+cd pdf-chat-ai
 ```
 
 2. **Install dependencies**
