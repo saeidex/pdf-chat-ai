@@ -186,7 +186,7 @@ export default function ChatPanel({
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="animate-in slide-in-from-bottom-5 sticky bottom-0 z-10 border-t bg-white/80 p-4 backdrop-blur-sm duration-300 dark:bg-zinc-900/80">
+            <div className="sticky bottom-0 z-10 border-t bg-white/80 p-4 backdrop-blur-sm duration-300 animate-in slide-in-from-bottom-5 dark:bg-zinc-900/80">
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit((values) => mutate(values))}
@@ -300,7 +300,7 @@ const MessageBubble = ({
     return (
         <div
             className={cn(
-                "animate-in fade-in-0 slide-in-from-bottom-5 mb-6 flex w-full duration-300",
+                "mb-6 flex w-full duration-300 animate-in fade-in-0 slide-in-from-bottom-5",
                 isUser ? "justify-end" : "justify-start"
             )}
         >

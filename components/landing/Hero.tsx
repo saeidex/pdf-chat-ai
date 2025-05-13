@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Bot, FileText, Search, Upload } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 const chatMessages = [
     {

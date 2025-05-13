@@ -1,6 +1,6 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import tseslint from "typescript-eslint";
 import importPlugin from "eslint-plugin-import-x";
+import tseslint from "typescript-eslint";
 
 const compat = new FlatCompat({
     baseDirectory: import.meta.dirname,

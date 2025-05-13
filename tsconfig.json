@@ -29,8 +29,11 @@
         "**/*.tsx",
         "**/*.cjs",
         "**/*.js",
-        ".next/types/**/*.ts"
-, "empty-module.mjs", "prettier.config.mjs", "eslint.config.mjs"    ],
+        ".next/types/**/*.ts",
+        "empty-module.mjs",
+        "prettier.config.mjs",
+        "eslint.config.mjs"
+    ],
     "exclude": ["node_modules"],
     "typeRoots": ["./node_modules/@types", ".@types"]
 }
