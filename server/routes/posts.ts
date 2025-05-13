@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
-import { createRouter } from "../lib/create-app";
 import { z } from "zod";
+
+import { createRouter } from "../lib/create-app";
 
 const router = createRouter()
     .get("/posts", (c) => {

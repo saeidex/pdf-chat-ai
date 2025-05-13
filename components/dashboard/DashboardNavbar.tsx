@@ -5,6 +5,7 @@ import { UserButton } from "@clerk/nextjs";
 import { FileText } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
 import { ModeToggle } from "../common/ModeToggle";
 
 export default function DashboardNavbar() {
@@ -22,9 +23,9 @@ export default function DashboardNavbar() {
     return (
         <header
             className={cn(
-                "sticky top-0 left-0 w-full z-50 transition-all duration-300 border-b",
+                "sticky top-0 left-0 z-50 w-full border-b transition-all duration-300",
                 isScrolled
-                    ? "bg-background/95 backdrop-blur-md shadow-sm"
+                    ? "bg-background/95 shadow-sm backdrop-blur-md"
                     : "bg-background"
             )}
         >
@@ -34,10 +35,10 @@ export default function DashboardNavbar() {
                         href="/dashboard"
                         className="flex items-center space-x-2"
                     >
-                        <div className="bg-primary/10 p-2 rounded-md">
+                        <div className="rounded-md bg-primary/10 p-2">
                             <FileText className="h-5 w-5 text-primary" />
                         </div>
-                        <span className="font-semibold text-xl">PdfChat</span>
+                        <span className="text-xl font-semibold">PdfChat</span>
                     </Link>
                     {/* TODO:
                     <div className="hidden md:flex flex-1 max-w-md mx-8">

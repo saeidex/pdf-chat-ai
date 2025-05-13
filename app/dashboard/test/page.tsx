@@ -93,9 +93,9 @@ export default function Page() {
     });
 
     return (
-        <div className="bg-red-300 dark:bg-red-900 min-h-screen flex flex-col items-center justify-center">
-            <div className="mx-auto max-w-5xl p-12 w-full">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-red-300 dark:bg-red-900">
+            <div className="mx-auto w-full max-w-5xl p-12">
+                <div className="mb-6 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
                     {responseText ? (
                         <Markdown content={responseText} />
                     ) : (
@@ -109,7 +109,7 @@ export default function Page() {
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit((data) => mutate(data))}
-                    className="space-y-2 w-full max-w-5xl px-12"
+                    className="w-full max-w-5xl space-y-2 px-12"
                 >
                     <FormField
                         control={form.control}

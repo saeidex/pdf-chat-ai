@@ -19,8 +19,6 @@ export default function UploadCard() {
     const queryClient = useQueryClient();
     const [isUploading, setIsUploading] = useState(false);
 
-    const userId = useAuth().userId;
-
     const {
         register,
         formState: { errors },
@@ -35,8 +33,6 @@ export default function UploadCard() {
     });
 
     const $post = hc.upload.$post;
-
-    const { user } = useClerk();
 
     const uploadMutation = useMutation<
         InferResponseType<typeof $post>,
@@ -103,7 +99,7 @@ export default function UploadCard() {
     return (
         <div
             onClick={triggerFileInput}
-            className="group border-2 border-dashed rounded-lg p-6 h-64 flex flex-col items-center justify-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/30"
+            className="group flex h-64 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/30 p-6 transition-colors hover:border-primary/50"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
@@ -122,26 +118,26 @@ export default function UploadCard() {
                     (e.target as HTMLInputElement).value = "";
                 }}
             />
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <Upload
                     className={`h-8 w-8 ${
                         isUploading ? "animate-pulse" : ""
                     } text-primary`}
                 />
             </div>
-            <h3 className="font-medium text-lg mb-1">Upload New</h3>
+            <h3 className="mb-1 text-lg font-medium">Upload New</h3>
             {isUploading ? (
-                <p className="text-sm text-primary text-center">Uploading...</p>
+                <p className="text-center text-sm text-primary">Uploading...</p>
             ) : errors.file ? (
-                <p className="text-sm text-destructive text-center">
+                <p className="text-center text-sm text-destructive">
                     {errors.file.message as string}
                 </p>
             ) : uploadMutation.isError ? (
-                <p className="text-sm text-destructive text-center">
+                <p className="text-center text-sm text-destructive">
                     {uploadMutation.error.message}
                 </p>
             ) : (
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-center text-sm text-muted-foreground">
                     Upload a PDF document to analyze
                 </p>
             )}

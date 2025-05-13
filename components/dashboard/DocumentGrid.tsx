@@ -25,7 +25,8 @@ import { hc } from "@/lib/honoClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 import { useState } from "react";
-import DocumentCard from "./DocumentCard";
+
+import DocumentCard, { DocumentCardSkeleton } from "./DocumentCard";
 import UploadCard from "./DocumentUploadCard";
 
 export default function DocumentGrid() {
@@ -34,20 +35,16 @@ export default function DocumentGrid() {
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
     const [newName, setNewName] = useState("");
 
-    const { data: documents } = useQuery<
-        InferResponseType<typeof hc.list.$get>
+    const $get = hc.documents.$get;
+    const { data: documents, isLoading } = useQuery<
+        InferResponseType<typeof $get>
     >({
         queryKey: ["documents"],
         queryFn: async () => {
-            const res = await hc.list.$get({
-                query: {
-                    containerName: "pdf-chat",
-                },
-            });
+            const res = await $get();
 
             return res.json();
         },
-        initialData: [],
     });
 
     const handleRename = (doc: any) => {
@@ -113,28 +110,32 @@ export default function DocumentGrid() {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
+        <div className="mx-auto w-full max-w-7xl">
+            <div className="mb-8 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">Documents</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 <UploadCard />
 
-                {documents.map((doc) => (
-                    <DocumentCard
-                        key={doc.id}
-                        document={{
-                            id: doc.id,
-                            name: doc.name,
-                            lastAccessAt: doc.lastModified,
-                        }}
-                        onRename={handleRename}
-                        onDelete={({ containerName, blobName }) =>
-                            handleDelete({ containerName, blobName })
-                        }
-                    />
-                ))}
+                {isLoading
+                    ? Array.from({ length: 11 }).map((_, index) => (
+                          <DocumentCardSkeleton key={index} />
+                      ))
+                    : documents?.map((doc) => (
+                          <DocumentCard
+                              key={doc.id}
+                              document={{
+                                  id: doc.id,
+                                  name: doc.name,
+                                  lastAccessAt: doc.lastAccessedAt,
+                              }}
+                              onRename={handleRename}
+                              onDelete={({ containerName, blobName }) =>
+                                  handleDelete({ containerName, blobName })
+                              }
+                          />
+                      ))}
             </div>
 
             <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
@@ -178,7 +179,7 @@ export default function DocumentGrid() {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={confirmDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
                         >
                             Delete
                         </AlertDialogAction>

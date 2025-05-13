@@ -1,9 +1,7 @@
+import { pinoLogger } from "@/server/middlewares/pino-logger";
 import { Hono, type Schema } from "hono";
-
 import { requestId } from "hono/request-id";
 import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
-
-import { pinoLogger } from "@/server/middlewares/pino-logger";
 
 import type { AppBindings } from "./types";
 

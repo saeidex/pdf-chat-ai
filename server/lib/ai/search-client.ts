@@ -1,7 +1,7 @@
 import env from "@/server/env";
 import {
-    SearchClient,
     AzureKeyCredential as SearchAzureKeyCredential,
+    SearchClient,
 } from "@azure/search-documents";
 
 const searchClient = new SearchClient(

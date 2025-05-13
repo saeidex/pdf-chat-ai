@@ -1,0 +1,80 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        String     @id
+    email     String?
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    documents Document[]
+    chats     Chat[]
+}
+
+model Document {
+    id             String         @id
+    name           String
+    blobName       String         @unique
+    containerName  String
+    mimeType       String         @default("application/pdf")
+    size           Int
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+    lastAccessedAt DateTime       @default(now())
+    userId         String
+    user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    chats          Chat[]
+    messageGroups  MessageGroup[]
+
+    @@index([userId])
+}
+
+model Chat {
+    id         String    @id @default(cuid())
+    title      String?
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    userId     String
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    documentId String
+    document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    messages   Message[]
+
+    @@index([userId])
+    @@index([documentId])
+}
+
+model MessageGroup {
+    id         String    @id @default(cuid())
+    createdAt  DateTime  @default(now())
+    documentId String
+    document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    messages   Message[]
+
+    @@index([documentId])
+}
+
+model Message {
+    id             String        @id @default(cuid())
+    content        String        @db.Text
+    role           Role
+    createdAt      DateTime      @default(now())
+    chatId         String?
+    chat           Chat?         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    messageGroupId String?
+    messageGroup   MessageGroup? @relation(fields: [messageGroupId], references: [id], onDelete: Cascade)
+
+    @@index([chatId])
+    @@index([messageGroupId])
+}
+
+enum Role {
+    USER
+    ASSISTANT
+    SYSTEM
+}

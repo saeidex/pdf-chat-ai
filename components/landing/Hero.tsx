@@ -45,9 +45,9 @@ const floatingElements = [
         position: "absolute top-12 -left-10 z-20 w-24 h-20",
         animationClass: "animate-float-slow",
         content: (
-            <div className="h-full w-full flex flex-col items-center justify-center">
+            <div className="flex h-full w-full flex-col items-center justify-center">
                 <Upload className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-                <p className="text-xs font-medium mt-1">Upload PDF</p>
+                <p className="mt-1 text-xs font-medium">Upload PDF</p>
             </div>
         ),
     },
@@ -69,43 +69,43 @@ const floatingElements = [
 const Hero = () => {
     return (
         <section
-            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-white to-blue-50/50 dark:from-background dark:to-indigo-950/10"
+            className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white to-blue-50/50 dark:from-background dark:to-indigo-950/10"
             id="hero"
         >
             <div className="absolute inset-0 z-0 overflow-hidden">
-                <div className="absolute inset-0 bg-grid-pattern opacity-[0.07] dark:opacity-[0.04]" />
-                <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-br from-blue-300/20 via-purple-300/15 to-indigo-300/20 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-indigo-500/10 blur-3xl transform translate-y-[-20%]"></div>
-                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-purple-300/20 via-blue-300/15 to-indigo-300/20 dark:from-purple-500/10 dark:via-blue-500/10 dark:to-indigo-500/10 blur-3xl transform translate-x-[20%] translate-y-[20%]"></div>
+                <div className="bg-grid-pattern absolute inset-0 opacity-[0.07] dark:opacity-[0.04]" />
+                <div className="absolute top-0 right-0 left-0 h-[500px] translate-y-[-20%] transform bg-gradient-to-br from-blue-300/20 via-purple-300/15 to-indigo-300/20 blur-3xl dark:from-blue-500/10 dark:via-purple-500/10 dark:to-indigo-500/10"></div>
+                <div className="absolute right-0 bottom-0 h-[600px] w-[600px] translate-x-[20%] translate-y-[20%] transform bg-gradient-to-tl from-purple-300/20 via-blue-300/15 to-indigo-300/20 blur-3xl dark:from-purple-500/10 dark:via-blue-500/10 dark:to-indigo-500/10"></div>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10 py-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    <div className="text-center mx-auto max-w-xl">
+            <div className="relative z-10 container mx-auto px-4 py-10">
+                <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+                    <div className="mx-auto max-w-xl text-center">
                         {/* Hero text content section */}
-                        <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 dark:bg-primary/5 text-primary border border-primary/20 dark:border-primary/10 mb-6 shadow-sm animate-fade-in-up">
-                            <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+                        <div className="animate-fade-in-up mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary shadow-sm dark:border-primary/10 dark:bg-primary/5">
+                            <span className="mr-2 flex h-2 w-2 animate-pulse rounded-full bg-primary"></span>
                             Try now
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in-up delay-100">
+                        <h1 className="animate-fade-in-up text-4xl font-bold tracking-tight delay-100 md:text-5xl lg:text-6xl">
                             Chat with your{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500">
+                            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
                                 PDF documents
                             </span>
                             using AI
                         </h1>
 
-                        <p className="mt-6 text-lg text-muted-foreground mx-auto animate-fade-in-up delay-200">
+                        <p className="animate-fade-in-up mx-auto mt-6 text-lg text-muted-foreground delay-200">
                             PdfChat uses advanced AI to help you analyze,
                             extract insights, and answer questions from your PDF
                             documents in seconds. No more manual searching.
                         </p>
 
-                        <div className="mt-8 flex justify-center animate-fade-in-up delay-300">
+                        <div className="animate-fade-in-up mt-8 flex justify-center delay-300">
                             <Link href="/dashboard">
                                 <Button
                                     size="lg"
-                                    className="font-medium text-base px-6"
+                                    className="px-6 text-base font-medium"
                                 >
                                     <ArrowUpRight className="mr-2 h-5 w-5" />
                                     Get Started
@@ -113,7 +113,7 @@ const Hero = () => {
                             </Link>
                         </div>
 
-                        <p className="mt-6 text-sm text-muted-foreground animate-fade-in-up delay-400">
+                        <p className="animate-fade-in-up mt-6 text-sm text-muted-foreground delay-400">
                             Secure and private. Your documents are processed
                             instantly.
                         </p>
@@ -121,31 +121,31 @@ const Hero = () => {
 
                     <div className="relative mx-auto">
                         {/* Animated glow effect */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[110%] rounded-[40%] z-0 animate-fade-in">
+                        <div className="animate-fade-in absolute top-1/2 left-1/2 z-0 h-[110%] w-[120%] -translate-x-1/2 -translate-y-1/2 transform rounded-[40%]">
                             {/* Multiple layers for richer glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-indigo-500/30 dark:from-blue-600/20 dark:via-purple-600/30 dark:to-indigo-500/20 blur-3xl rounded-[40%]" />
-                            <div className="absolute inset-[10%] bg-gradient-to-tr from-purple-500/20 via-blue-500/25 to-purple-400/20 dark:from-purple-600/20 dark:via-blue-500/25 dark:to-purple-400/15 blur-2xl rounded-[30%]" />
+                            <div className="absolute inset-0 rounded-[40%] bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-indigo-500/30 blur-3xl dark:from-blue-600/20 dark:via-purple-600/30 dark:to-indigo-500/20" />
+                            <div className="absolute inset-[10%] rounded-[30%] bg-gradient-to-tr from-purple-500/20 via-blue-500/25 to-purple-400/20 blur-2xl dark:from-purple-600/20 dark:via-blue-500/25 dark:to-purple-400/15" />
                         </div>
 
                         {/* Chat preview */}
-                        <div className="relative z-10 overflow-hidden rounded-2xl border border-border/60 shadow-xl bg-white dark:bg-background animate-fade-in-up delay-200">
+                        <div className="animate-fade-in-up relative z-10 overflow-hidden rounded-2xl border border-border/60 bg-white shadow-xl delay-200 dark:bg-background">
                             {/* Document header */}
-                            <div className="rounded-t-2xl bg-muted/80 dark:bg-muted/70 border-b border-border/60 p-4 flex items-center justify-between">
+                            <div className="flex items-center justify-between rounded-t-2xl border-b border-border/60 bg-muted/80 p-4 dark:bg-muted/70">
                                 <div className="flex items-center">
-                                    <FileText className="h-5 w-5 text-primary mr-2" />
+                                    <FileText className="mr-2 h-5 w-5 text-primary" />
                                     <span className="font-medium">
                                         AnnualReport2023.pdf
                                     </span>
                                 </div>
                                 <div className="flex gap-1.5">
-                                    <div className="w-3 h-3 rounded-full bg-green-500 opacity-80 dark:opacity-70" />
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500 opacity-80 dark:opacity-70" />
-                                    <div className="w-3 h-3 rounded-full bg-red-500 opacity-80 dark:opacity-70" />
+                                    <div className="h-3 w-3 rounded-full bg-green-500 opacity-80 dark:opacity-70" />
+                                    <div className="h-3 w-3 rounded-full bg-yellow-500 opacity-80 dark:opacity-70" />
+                                    <div className="h-3 w-3 rounded-full bg-red-500 opacity-80 dark:opacity-70" />
                                 </div>
                             </div>
 
                             {/* Chat messages */}
-                            <div className="p-6 flex flex-col gap-4 bg-white dark:bg-background">
+                            <div className="flex flex-col gap-4 bg-white p-6 dark:bg-background">
                                 {chatMessages.map((message) => (
                                     <div
                                         key={message.id}
@@ -165,7 +165,7 @@ const Hero = () => {
                                                 {message.name}
                                             </p>
                                             {Array.isArray(message.message) ? (
-                                                <div className="text-sm text-muted-foreground mt-1 space-y-2">
+                                                <div className="mt-1 space-y-2 text-sm text-muted-foreground">
                                                     {message.message.map(
                                                         (paragraph, i) => (
                                                             <p key={i}>
@@ -195,9 +195,9 @@ const Hero = () => {
                                     <input
                                         type="text"
                                         placeholder="Ask a question..."
-                                        className="w-full px-4 py-2.5 rounded-lg border border-input bg-white/90 dark:bg-background/90 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
+                                        className="w-full rounded-lg border border-input bg-white/90 px-4 py-2.5 text-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/30 focus:outline-none dark:bg-background/90"
                                     />
-                                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary">
+                                    <button className="absolute top-1/2 right-2 -translate-y-1/2 transform text-muted-foreground hover:text-primary">
                                         <Search className="h-5 w-5" />
                                     </button>
                                 </div>
@@ -208,7 +208,7 @@ const Hero = () => {
                         {floatingElements.map((element) => (
                             <div
                                 key={element.id}
-                                className={`${element.position} ${element.animationClass} bg-white dark:bg-background rounded-xl shadow-lg border border-border/60`}
+                                className={`${element.position} ${element.animationClass} rounded-xl border border-border/60 bg-white shadow-lg dark:bg-background`}
                             >
                                 {element.content}
                             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMounted } from "@/hooks/use-mounted";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -26,7 +27,7 @@ const scale = 1.0 as const;
 const rotation = 0 as const;
 
 export default function PdfRenderer({ url }: PdfRendererProps) {
-    console.log("PDF URL:", url);
+    const isMounted = useMounted();
 
     const [numPages, setNumPages] = useState<number>(0);
     const [isDocumentLoading, setIsDocumentLoading] = useState(true);
@@ -58,12 +59,12 @@ export default function PdfRenderer({ url }: PdfRendererProps) {
 
     return (
         <div
-            className="w-full h-full bg-background rounded-md shadow relative"
+            className="relative h-full w-full rounded-md bg-background shadow"
             ref={ref}
         >
-            {isDocumentLoading && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin mb-2" />
+            {(isDocumentLoading || !isMounted) && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+                    <Loader2 className="mb-2 h-8 w-8 animate-spin" />
                     <p className="text-sm text-muted-foreground">
                         Loading PDF document...
                     </p>
@@ -71,8 +72,8 @@ export default function PdfRenderer({ url }: PdfRendererProps) {
             )}
 
             {isResizing && !isDocumentLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-40 flex flex-col items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
+                    <Loader2 className="mb-2 h-8 w-8 animate-spin" />
                     <p className="text-sm text-muted-foreground">
                         Resizing view...
                     </p>
@@ -130,7 +131,7 @@ export default function PdfRenderer({ url }: PdfRendererProps) {
                                             !isResizing,
                                     })}
                                     error={
-                                        <div className="flex justify-center py-10 text-red-500">
+                                        <div className="flex h-full w-full items-center justify-center py-10 text-red-500">
                                             <p>
                                                 Failed to render page{" "}
                                                 {pageNumber}

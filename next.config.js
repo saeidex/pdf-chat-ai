@@ -1,20 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
-    images: { unoptimized: true },
-    webpack: (config) => {
-        config.resolve.alias.canvas = false;
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: { unoptimized: true },
+  webpack: (config) => {
+    config.resolve.alias.canvas = false;
 
-        return config;
+    return config;
+  },
+  turbopack: {
+    resolveAlias: {
+      canvas: "./empty-module.js",
     },
-    turbopack: {
-        resolveAlias: {
-            canvas: "./empty-module.js",
-        },
-    },
-    serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
+  },
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
 };
 
 module.exports = nextConfig;

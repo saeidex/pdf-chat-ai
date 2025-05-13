@@ -6,6 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import {
     FileText,
@@ -40,29 +41,29 @@ export default function DocumentCard({
     onDelete,
 }: DocumentCardProps) {
     return (
-        <div className="group relative border rounded-lg overflow-hidden h-64 bg-muted/20 hover:shadow-md transition-all">
+        <div className="group relative h-64 overflow-hidden rounded-lg border bg-muted/20 transition-all hover:shadow-md">
             <Link
                 href={`/dashboard/chats/${doc.id}`}
                 className="block h-3/4 w-full"
             >
-                <div className="h-full w-full bg-background border-b relative overflow-hidden">
-                    <div className="flex justify-center items-center w-full h-full bg-muted/30">
+                <div className="relative h-full w-full overflow-hidden border-b bg-background">
+                    <div className="flex h-full w-full items-center justify-center bg-muted/30">
                         <FileText className="h-16 w-16 text-primary/30" />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-all group-hover:opacity-100">
                         <Button className="flex items-center gap-2">
                             <MessageSquareText className="h-4 w-4" />
-                            Chat with PDF
+                            Chat
                         </Button>
                     </div>
                 </div>
             </Link>
 
-            <div className="p-3 flex justify-between items-center">
+            <div className="flex items-center justify-between p-3">
                 <div className="overflow-hidden">
-                    <h3 className="font-medium truncate">{doc.name}</h3>
+                    <h3 className="truncate font-medium">{doc.name}</h3>
                     <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(doc.lastAccessAt), {
                             addSuffix: true,
@@ -80,15 +81,15 @@ export default function DocumentCard({
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                             <Link href={`/dashboard/chats/${doc.id}`}>
-                                <MessageSquareText className="h-4 w-4 mr-2" />
-                                Chat with PDF
+                                <MessageSquareText className="mr-2 h-4 w-4" />
+                                Chat
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             disabled
                             onClick={() => onRename(doc)}
                         >
-                            <Pencil className="h-4 w-4 mr-2" />
+                            <Pencil className="mr-2 h-4 w-4" />
                             Rename
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -101,11 +102,29 @@ export default function DocumentCard({
                                 })
                             }
                         >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+            </div>
+        </div>
+    );
+}
+
+export function DocumentCardSkeleton() {
+    return (
+        <div className="h-64 overflow-hidden rounded-lg border">
+            <div className="relative h-3/4 w-full overflow-hidden border-b bg-background">
+                <Skeleton className="h-full w-full" />
+            </div>
+
+            <div className="flex items-center justify-between p-3">
+                <div className="w-full space-y-2">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-full" />
             </div>
         </div>
     );
