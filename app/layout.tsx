@@ -20,11 +20,11 @@ export const metadata: Metadata = {
         title: "PdfChat - AI-Powered Document Analysis",
         description:
             "Chat with your PDF documents using advanced AI analysis. Extract insights, answer questions, and analyze documents effortlessly.",
-        url: "https://pdfchat.app",
+        url: "https://pdf-chat-ai-sand.vercel.app/",
         siteName: "PdfChat",
         images: [
             {
-                url: "https://images.pexels.com/photos/7532110/pexels-photo-7532110.jpeg",
+                url: "https://pdf-chat-ai-sand.vercel.app/preview.png",
                 width: 1200,
                 height: 630,
                 alt: "PdfChat Application Preview",
@@ -37,9 +37,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "PdfChat - AI-Powered Document Analysis",
         description: "Chat with your PDF documents using advanced AI analysis.",
-        images: [
-            "https://images.pexels.com/photos/7532110/pexels-photo-7532110.jpeg",
-        ],
+        images: ["https://pdf-chat-ai-sand.vercel.app/preview.png"],
     },
 };
 
